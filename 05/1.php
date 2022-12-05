@@ -3,16 +3,6 @@
 // Init vars
 $input_file = 'input.txt';
 
-$stack[1] = 'RGHQSBTN';
-$stack[2] = 'HSFDPZJ';
-$stack[3] = 'ZHV';
-$stack[4] = 'MZJFGH';
-$stack[5] = 'TZCDLMSR';
-$stack[6] = 'MTWVHZJ';
-$stack[7] = 'TFPLZ';
-$stack[8] = 'QVWS';
-$stack[9] = 'WHLMTDNC';
-
 // Load input
 $handle = fopen($input_file, "r");
 if ($handle)
@@ -37,7 +27,41 @@ if ($handle)
                 $stack[$from] = substr($stack[$from], 0, strlen($stack[$from]) - 1);
             }
         }
-    }
+        else
+        {
+            // It's not a move
+
+            if (strlen($line) > 1)
+            {
+                // It's a configuration line
+
+                // For every stack
+                for ($i = 1; $i <= (strlen($line) / 4); $i++)
+                {
+                    // Pick possible element
+                    $c = substr($line, $i * 4 - 3, 1);
+
+                    // Check if it's a valid element
+                    if (preg_match('/[A-Z]/', $c, $matches) === 1)
+                    {
+                        // Load element on stack (in reverse order)
+                        $stack[$i] = $stack[$i] . $c;
+                    }
+                }
+            }
+            else
+            {
+                // Configuration completed
+
+                // For every stack
+                for ($i = 1; $i <= count($stack); $i++)
+                {
+                    // Reverse stack order
+                    $stack[$i] = strrev($stack[$i]);
+                }
+            }
+        }
+     }
 
     fclose($handle);
 }
