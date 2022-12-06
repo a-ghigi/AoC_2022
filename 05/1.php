@@ -8,6 +8,7 @@ $handle = fopen($input_file, "r");
 if ($handle)
 {
     $matches = [];
+    $stack = [];
 
     // Read input, line by line
     while (($line = fgets($handle)) !== false)
@@ -45,7 +46,14 @@ if ($handle)
                     if (preg_match('/[A-Z]/', $c, $matches) === 1)
                     {
                         // Load element on stack (in reverse order)
-                        $stack[$i] = $stack[$i] . $c;
+                        if (array_key_exists($i, $stack))
+                        {
+                            $stack[$i] = $stack[$i] . $c;
+                        }
+                        else
+                        {
+                            $stack[$i] = $c;
+                        }
                     }
                 }
             }
@@ -61,7 +69,7 @@ if ($handle)
                 }
             }
         }
-     }
+    }
 
     fclose($handle);
 }
