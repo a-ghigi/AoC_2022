@@ -14,7 +14,7 @@ if ($handle)
         $line = trim($line);
 
         // Scan input from left to right
-        for ($i = 0; $ $i <= strlen($line) - $packet_length; $i++)
+        for ($i = 0; $i <= strlen($line) - $packet_length; $i++)
         {
             // Extract packet
             $packet = substr($line, $i, $packet_length);
