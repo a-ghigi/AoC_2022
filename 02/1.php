@@ -22,13 +22,13 @@ $translate_me['X'] = 'R';
 $translate_me['Y'] = 'P';
 $translate_me['Z'] = 'S';
 
+$score = 0;
+
 
 // Load input
 $handle = fopen($input_file, "r");
 if ($handle)
 {
-    $score = 0;
-
     // Read input, line by line
     while (($line = fgets($handle)) !== false)
     {

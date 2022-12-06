@@ -2,13 +2,12 @@
 
 // Init vars
 $input_file = 'input.txt';
+$priorities = 0;
 
 // Load input
 $handle = fopen($input_file, "r");
 if ($handle)
 {
-    $priorities = 0;
-
     // Read input, line by line
     while (($line = fgets($handle)) !== false)
     {
