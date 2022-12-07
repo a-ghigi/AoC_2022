@@ -27,3 +27,60 @@ if ($handle)
 }
 
 echo($count);
+
+
+// ---- Data Structures ------------------------------------------------------- 
+
+class file 
+{
+    protected $parent;
+    protected $name;
+    protected $size;
+
+    public function __construct($name, $size)
+    {
+        $this->parent = null;
+        $this->name = $name;
+        $this->size = $size;
+    }
+
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    public function getSize()
+    {
+        return $this->size;
+    }
+}
+
+class directory extends file
+{
+    protected $content;
+
+    public function __construct($name)
+    {
+        parent::__construct($name, null);
+        $this->content = [];
+    }
+
+    public function getSize()
+    {
+        $totalSize = 0;
+
+        foreach ($this->content as $fileOrDir)
+        {
+            $size = $fileOrDir->getSize();
+            $totalSize += $size;
+        }
+
+        return $totalSize;
+    }
+
+    public function insert($file)
+    {
+        $file->parent = &$this;
+        $this->content[] = $file;
+    }
+}
