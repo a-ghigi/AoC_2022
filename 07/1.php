@@ -9,9 +9,10 @@ include '../../_libs/kint.php';
 
 // Init vars
 $inputFile = 'input.txt';
-$count = 0;
-$root = new directory('');
-$working_directory = &$root;
+$root = new MyDirectory('');
+$referenceToRoot = &$root;
+$referenceToCurrentDirectory = $referenceToRoot;
+d($root, $referenceToRoot, $referenceToCurrentDirectory);
 
 // Load input
 $handle = fopen($inputFile, "r");
@@ -24,6 +25,56 @@ if ($handle)
         $matches = [];
 
         // Check command type
+        if (preg_match('/^\$ ls$/', $line, $matches) === 1)
+        {
+            // It's a ls
+
+            // Start reading directory listing
+            $stillInDirListing = true;
+            do
+                // Read an input line
+                if (($line = fgets($handle)) !== null)
+                {
+                    $line = trim($line);
+
+                    // Parse input line
+                    if (preg_match('/^([^ ]+) (.+)/', $line, $matches) === 1)
+                    {
+                        switch ($matches[1])
+                        {
+                            case '$':
+                                $stillInDirListing = false;
+                                break;
+                            case 'dir':
+                                $dirName = $matches[2];
+                                $directory = new MyDirectory($dirName);
+                                $referenceToCurrentDirectory->insert($directory);
+                                d($line, 'insert dir', $dirName);
+                                break;
+                            default:
+                                // It's a file
+                                $size = intval($matches[1]);
+                                $fileName = $matches[2];
+                                $file = new MyFile($fileName, $size);
+                                $referenceToCurrentDirectory->insert($file);
+                                d($line, 'insert file', $fileName, $size);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // End of input
+                        $stillInDirListing = false;
+                    }
+                }
+                else
+                {
+                    // End of input
+                    $stillInDirListing = false;
+                }
+            while ($stillInDirListing);
+        }
+
         if (preg_match('/^\$ cd (.+)/', $line, $matches) === 1)
         {
             // It's a cd
@@ -44,15 +95,12 @@ if ($handle)
             }
             d($line, 'cd', $dirName);
         }
-        
-        d($line, $root);
     }
 
     fclose($handle);
 }
 
-echo($count);
-
+d($referenceToRoot, $referenceToCurrentDirectory);
 
 // ---- Data Structures ------------------------------------------------------- 
 
