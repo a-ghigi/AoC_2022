@@ -31,6 +31,10 @@ if ($handle)
             // Start reading directory listing
             $stillInDirListing = true;
             do
+            {
+                // Save input position
+                $inputPos = ftell($handle);
+
                 // Read an input line
                 if (($line = fgets($handle)) !== null)
                 {
@@ -44,6 +48,9 @@ if ($handle)
                             case '$':
                                 // New command, directory content ended
                                 $stillInDirListing = false;
+
+                                // Rewind input
+                                fseek($handle, $inputPos);
                                 break;
                             case 'dir':
                                 // It's a directory
@@ -69,10 +76,10 @@ if ($handle)
                     // End of input
                     $stillInDirListing = false;
                 }
+            }
             while ($stillInDirListing);
         }
-
-        if (preg_match('/^\$ cd (.+)/', $line, $matches) === 1)
+        elseif (preg_match('/^\$ cd (.+)/', $line, $matches) === 1)
         {
             // It's a cd
             $dirName = $matches[1];
