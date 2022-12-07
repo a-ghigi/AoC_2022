@@ -10,6 +10,7 @@ include '../../_libs/kint.php';
 // Init vars
 $inputFile = 'input.txt';
 $fileSystem = new FileSystem();
+$result1 = 0;
 
 // Load input
 $handle = fopen($inputFile, "r");
@@ -81,6 +82,11 @@ if ($handle)
     fclose($handle);
 }
 
+$fileSystem->collectDataForResults(100000);
+
+// Part 1
+echo('Part 1: ' . $result1);
+
 // ---- Data Structures ------------------------------------------------------- 
 
 class File 
@@ -115,7 +121,7 @@ class File
         return $name;
     }
 
-    public function getSize()
+    public function getSize($limit = 0)
     {
         return $this->size;
     }
@@ -139,14 +145,21 @@ class Dir extends File
         $this->content = [];
     }
 
-    public function getSize()
+    public function getSize($limit = 0)
     {
+        global $result1;
+
         $totalSize = 0;
 
         foreach ($this->content as $fileOrDir)
         {
-            $size = $fileOrDir->getSize();
+            $size = $fileOrDir->getSize($limit);
             $totalSize += $size;
+        }
+
+        if ($this->name AND ($limit === null OR $totalSize <= $limit))
+        {
+            $result1 += $totalSize;
         }
 
         return $totalSize;
@@ -181,6 +194,7 @@ class FileSystem
 {
     protected $referenceToRoot;
     protected $referenceToCurrentDir;
+    static $result2 = [];
 
     public function __construct()
     {
@@ -223,5 +237,11 @@ class FileSystem
         echo('<pre>' . PHP_EOL);
         $this->referenceToRoot->dump();
         echo('</pre>' . PHP_EOL);
+    }
+    public function collectDataForResults($limit)
+    
+
+    {
+        $this->referenceToRoot->getSize($limit);
     }
 }
