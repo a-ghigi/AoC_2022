@@ -9,10 +9,10 @@ include '../../_libs/kint.php';
 
 // Init vars
 $inputFile = 'input.txt';
-$root = new MyDirectory('');
+$root = new Dir('');
 $referenceToRoot = &$root;
-$referenceToCurrentDirectory = $referenceToRoot;
-d($root, $referenceToRoot, $referenceToCurrentDirectory);
+$referenceToCurrentDir = $referenceToRoot;
+d($root, $referenceToRoot, $referenceToCurrentDir);
 
 // Load input
 $handle = fopen($inputFile, "r");
@@ -47,16 +47,16 @@ if ($handle)
                                 break;
                             case 'dir':
                                 $dirName = $matches[2];
-                                $directory = new MyDirectory($dirName);
-                                $referenceToCurrentDirectory->insert($directory);
+                                $directory = new Dir($dirName);
+                                $referenceToCurrentDir->insert($directory);
                                 d($line, 'insert dir', $dirName);
                                 break;
                             default:
                                 // It's a file
                                 $size = intval($matches[1]);
                                 $fileName = $matches[2];
-                                $file = new MyFile($fileName, $size);
-                                $referenceToCurrentDirectory->insert($file);
+                                $file = new File($fileName, $size);
+                                $referenceToCurrentDir->insert($file);
                                 d($line, 'insert file', $fileName, $size);
                                 break;
                         }
@@ -83,14 +83,14 @@ if ($handle)
             switch ($dirName)
             {
                 case '/':
-                    $referenceToCurrentDirectory = $referenceToRoot;
+                    $referenceToCurrentDir = $referenceToRoot;
                     break;
                 case '..':
-                    $referenceToCurrentDirectory = $referenceToCurrentDirectory->getParent();
+                    $referenceToCurrentDir = $referenceToCurrentDir->getParent();
                     break;
                 default:
                     // Find requested dir in content
-                    $referenceToCurrentDirectory = $referenceToCurrentDirectory->getReferenceToChildren($dirName);
+                    $referenceToCurrentDir = $referenceToCurrentDir->getReferenceToChildren($dirName);
                     break;
             }
             d($line, 'cd', $dirName);
@@ -100,11 +100,11 @@ if ($handle)
     fclose($handle);
 }
 
-d($referenceToRoot, $referenceToCurrentDirectory);
+d($referenceToRoot, $referenceToCurrentDir);
 
 // ---- Data Structures ------------------------------------------------------- 
 
-class MyFile 
+class File 
 {
     protected $referenceToParent;
     protected $name;
@@ -128,7 +128,7 @@ class MyFile
     }
 }
 
-class MyDirectory extends MyFile
+class Dir extends File
 {
     protected $content;
 
