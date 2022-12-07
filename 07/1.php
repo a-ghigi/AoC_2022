@@ -10,6 +10,8 @@ include '../../_libs/kint.php';
 // Init vars
 $input_file = 'input.txt';
 $count = 0;
+$root = new directory('');
+$working_directory = &$root;
 
 // Load input
 $handle = fopen($input_file, "r");
@@ -18,9 +20,31 @@ if ($handle)
     // Read input, line by line
     while (($line = fgets($handle)) !== false)
     {
-        // Do something
+        $line = trim($line);
+        $matches = [];
+
+        // Check command type
+        if (preg_match('/^\$ cd (.+)/', $line, $matches) === 1)
+        {
+            // It's a cd
+            $dir_name = $matches[1];
+
+            switch ($dir_name)
+            {
+                case '/':
+                    $working_directory = &$root;
+                    break;
+                case '..':
+                    $working_directory = $working_directory->getParent();
+                    break;
+                default:
+                    // Find requested dir in content
+                    $working_directory = $working_directory->get_children($dir_name);
+                    break;
+            }
+        }
         
-        d($line);
+        d($line, $root);
     }
 
     fclose($handle);
@@ -81,6 +105,11 @@ class directory extends file
     public function insert($file)
     {
         $file->parent = &$this;
-        $this->content[] = $file;
+        $this->content[$file->name] = $file;
+    }
+
+    public function &get_children($name)
+    {
+        return $this->content[$name];
     }
 }
