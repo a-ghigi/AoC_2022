@@ -81,8 +81,6 @@ if ($handle)
     fclose($handle);
 }
 
-$fileSystem->dump();
-
 // ---- Data Structures ------------------------------------------------------- 
 
 class File 
