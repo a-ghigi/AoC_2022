@@ -9,10 +9,7 @@ include '../../_libs/kint.php';
 
 // Init vars
 $inputFile = 'input.txt';
-$root = new Dir('');
-$referenceToRoot = &$root;
-$referenceToCurrentDir = $referenceToRoot;
-d($root, $referenceToRoot, $referenceToCurrentDir);
+$fileSystem = new FileSystem();
 
 // Load input
 $handle = fopen($inputFile, "r");
@@ -43,20 +40,20 @@ if ($handle)
                         switch ($matches[1])
                         {
                             case '$':
+                                // New command, directory content ended
                                 $stillInDirListing = false;
                                 break;
                             case 'dir':
+                                // It's a directory
                                 $dirName = $matches[2];
-                                $directory = new Dir($dirName);
-                                $referenceToCurrentDir->insert($directory);
+                                $fileSystem->mkdir($dirName);
                                 d($line, 'insert dir', $dirName);
                                 break;
                             default:
                                 // It's a file
                                 $size = intval($matches[1]);
                                 $fileName = $matches[2];
-                                $file = new File($fileName, $size);
-                                $referenceToCurrentDir->insert($file);
+                                $fileSystem->write($fileName, $size);
                                 d($line, 'insert file', $fileName, $size);
                                 break;
                         }
@@ -79,20 +76,7 @@ if ($handle)
         {
             // It's a cd
             $dirName = $matches[1];
-
-            switch ($dirName)
-            {
-                case '/':
-                    $referenceToCurrentDir = $referenceToRoot;
-                    break;
-                case '..':
-                    $referenceToCurrentDir = $referenceToCurrentDir->getParent();
-                    break;
-                default:
-                    // Find requested dir in content
-                    $referenceToCurrentDir = $referenceToCurrentDir->getReferenceToChildren($dirName);
-                    break;
-            }
+            $fileSystem->cd($dirName);
             d($line, 'cd', $dirName);
         }
     }
@@ -100,7 +84,7 @@ if ($handle)
     fclose($handle);
 }
 
-d($referenceToRoot, $referenceToCurrentDir);
+$fileSystem->dump();
 
 // ---- Data Structures ------------------------------------------------------- 
 
@@ -122,9 +106,31 @@ class File
         return $this->referenceToParent;
     }
 
+    public function getName()
+    {
+        if ($this->name)
+        {
+            $name = $this->name;
+        }
+        else
+        {
+            $name = '\\';
+        }
+
+        return $name;
+    }
+
     public function getSize()
     {
         return $this->size;
+    }
+
+    public function dump($level = 0)
+    {
+        echo(str_pad('', $level * 2));
+        echo('- ');
+        echo($this->getName());
+        echo(' (file, size=' . $this->size . ')' . PHP_EOL);
     }
 }
 
@@ -160,5 +166,67 @@ class Dir extends File
     public function &getReferenceToChildren($name)
     {
         return $this->content[$name];
+    }
+
+    public function dump($level = 0)
+    {
+        echo(str_pad('', $level * 2));
+        echo('- ');
+        echo($this->getName());
+        echo(' (dir)' . PHP_EOL);
+
+        foreach($this->content as $fileOrDir)
+        {
+            $fileOrDir->dump($level + 1);
+        }
+    }
+}
+
+class FileSystem
+{
+    protected $referenceToRoot;
+    protected $referenceToCurrentDir;
+
+    public function __construct()
+    {
+        $root = new Dir('');
+        $this->referenceToRoot = &$root;
+        $this->referenceToCurrentDir = $this->referenceToRoot;
+    }
+
+    public function cd($dirName)
+    {
+        switch ($dirName)
+        {
+            case '/':
+                $this->referenceToCurrentDir = $this->referenceToRoot;
+                break;
+            case '..':
+                $this->referenceToCurrentDir = $this->referenceToCurrentDir->getParent();
+                break;
+            default:
+                // Find requested dir in content
+                $this->referenceToCurrentDir = $this->referenceToCurrentDir->getReferenceToChildren($dirName);
+                break;
+        }
+    }
+
+    public function mkdir($dirName)
+    {
+        $directory = new Dir($dirName);
+        $this->referenceToCurrentDir->insert($directory);
+    }
+
+    public function write($fileName, $size)
+    {
+        $file = new File($fileName, $size);
+        $this->referenceToCurrentDir->insert($file);
+    }
+
+    public function dump()
+    {
+        echo('<pre>' . PHP_EOL);
+        $this->referenceToRoot->dump();
+        echo('</pre>' . PHP_EOL);
     }
 }
