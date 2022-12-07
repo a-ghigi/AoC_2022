@@ -11,6 +11,7 @@ include '../../_libs/kint.php';
 $inputFile = 'input.txt';
 $fileSystem = new FileSystem();
 $result1 = 0;
+$dirSizes = [];
 
 // Load input
 $handle = fopen($inputFile, "r");
@@ -87,6 +88,30 @@ $fileSystem->collectDataForResults(100000);
 // Part 1
 echo('Part 1: ' . $result1);
 
+
+// Part2
+
+// Sort dir sizes in ascending order
+sort($dirSizes);
+
+$diskSize = 70000000;
+$diskUsage = $dirSizes[count($dirSizes) - 1];     // Root size, the biggest one
+$diskFree = $diskSize - $diskUsage;
+
+$updateSize = 30000000;
+$spaceNeeded = $updateSize - $diskFree;
+
+// Find first dir bigger than spaceNeeded
+foreach ($dirSizes as $size)
+{
+    if ($size >= $spaceNeeded)
+    {
+        echo('<br />' . PHP_EOL . 'Part 2: ' . $size);
+        die();
+    }
+}
+
+
 // ---- Data Structures ------------------------------------------------------- 
 
 class File 
@@ -148,6 +173,7 @@ class Dir extends File
     public function getSize($limit = 0)
     {
         global $result1;
+        global $dirSizes;
 
         $totalSize = 0;
 
@@ -161,6 +187,8 @@ class Dir extends File
         {
             $result1 += $totalSize;
         }
+
+        $dirSizes[] = $totalSize;
 
         return $totalSize;
     }
@@ -194,7 +222,6 @@ class FileSystem
 {
     protected $referenceToRoot;
     protected $referenceToCurrentDir;
-    static $result2 = [];
 
     public function __construct()
     {
