@@ -1,12 +1,5 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-include '../../_libs/kint.phar';
-include '../../_libs/kint.php';
-
 // Init vars
 $inputFile = 'input.txt';
 $fileSystem = new FileSystem();
