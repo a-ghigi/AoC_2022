@@ -8,13 +8,13 @@ include '../../_libs/kint.phar';
 include '../../_libs/kint.php';
 
 // Init vars
-$input_file = 'input.txt';
+$inputFile = 'input.txt';
 $count = 0;
 $root = new directory('');
 $working_directory = &$root;
 
 // Load input
-$handle = fopen($input_file, "r");
+$handle = fopen($inputFile, "r");
 if ($handle)
 {
     // Read input, line by line
@@ -27,21 +27,22 @@ if ($handle)
         if (preg_match('/^\$ cd (.+)/', $line, $matches) === 1)
         {
             // It's a cd
-            $dir_name = $matches[1];
+            $dirName = $matches[1];
 
-            switch ($dir_name)
+            switch ($dirName)
             {
                 case '/':
-                    $working_directory = &$root;
+                    $referenceToCurrentDirectory = $referenceToRoot;
                     break;
                 case '..':
-                    $working_directory = $working_directory->getParent();
+                    $referenceToCurrentDirectory = $referenceToCurrentDirectory->getParent();
                     break;
                 default:
                     // Find requested dir in content
-                    $working_directory = $working_directory->get_children($dir_name);
+                    $referenceToCurrentDirectory = $referenceToCurrentDirectory->getReferenceToChildren($dirName);
                     break;
             }
+            d($line, 'cd', $dirName);
         }
         
         d($line, $root);
@@ -55,22 +56,22 @@ echo($count);
 
 // ---- Data Structures ------------------------------------------------------- 
 
-class file 
+class MyFile 
 {
-    protected $parent;
+    protected $referenceToParent;
     protected $name;
     protected $size;
 
     public function __construct($name, $size)
     {
-        $this->parent = null;
+        $this->referenceToParent = null;
         $this->name = $name;
         $this->size = $size;
     }
 
     public function getParent()
     {
-        return $this->parent;
+        return $this->referenceToParent;
     }
 
     public function getSize()
@@ -79,7 +80,7 @@ class file
     }
 }
 
-class directory extends file
+class MyDirectory extends MyFile
 {
     protected $content;
 
@@ -104,11 +105,11 @@ class directory extends file
 
     public function insert($file)
     {
-        $file->parent = &$this;
+        $file->referenceToParent = &$this;
         $this->content[$file->name] = $file;
     }
 
-    public function &get_children($name)
+    public function &getReferenceToChildren($name)
     {
         return $this->content[$name];
     }
