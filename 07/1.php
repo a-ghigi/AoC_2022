@@ -47,14 +47,12 @@ if ($handle)
                                 // It's a directory
                                 $dirName = $matches[2];
                                 $fileSystem->mkdir($dirName);
-                                d($line, 'insert dir', $dirName);
                                 break;
                             default:
                                 // It's a file
                                 $size = intval($matches[1]);
                                 $fileName = $matches[2];
                                 $fileSystem->write($fileName, $size);
-                                d($line, 'insert file', $fileName, $size);
                                 break;
                         }
                     }
@@ -77,7 +75,6 @@ if ($handle)
             // It's a cd
             $dirName = $matches[1];
             $fileSystem->cd($dirName);
-            d($line, 'cd', $dirName);
         }
     }
 
