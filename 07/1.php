@@ -154,10 +154,10 @@ class Dir extends File
         return $totalSize;
     }
 
-    public function insert($file)
+    public function insert($fileOrDir)
     {
-        $file->referenceToParent = &$this;
-        $this->content[$file->name] = $file;
+        $fileOrDir->referenceToParent = &$this;
+        $this->content[$fileOrDir->name] = $fileOrDir;
     }
 
     public function &getReferenceToChildren($name)
