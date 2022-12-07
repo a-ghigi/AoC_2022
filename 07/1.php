@@ -101,7 +101,7 @@ class File
         $this->size = $size;
     }
 
-    public function getParent()
+    public function getReferenceToParent()
     {
         return $this->referenceToParent;
     }
@@ -202,7 +202,7 @@ class FileSystem
                 $this->referenceToCurrentDir = $this->referenceToRoot;
                 break;
             case '..':
-                $this->referenceToCurrentDir = $this->referenceToCurrentDir->getParent();
+                $this->referenceToCurrentDir = $this->referenceToCurrentDir->getReferenceToParent();
                 break;
             default:
                 // Find requested dir in content
