@@ -2,7 +2,7 @@
 
 // Init vars
 $input_file = 'input.txt';
-$trees = [];
+$forest = [];
 $maxScore = 0;
 
 // Load input

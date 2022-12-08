@@ -2,7 +2,7 @@
 
 // Init vars
 $input_file = 'input.txt';
-$trees = [];
+$forest = [];
 $count = 0;
 
 // Load input
