@@ -116,7 +116,7 @@ for ($round = 1; $round <= 20; $round++)
 // Sort examined array in reverse order
 arsort($examined);
 
-// Compute monkey situation by multiplying first two elements
+// Compute monkey business by multiplying first two elements
 $result = 1;
 $count = 0;
 foreach ($examined as $value)
