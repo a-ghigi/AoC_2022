@@ -1,13 +1,9 @@
 <?php
 
+// Go backwards, just once, from end to first 'a' or 'S' visited
+// Be careful to build graph properly
+
 set_time_limit(0);
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-include '../../_libs/kint.phar';
-include '../../_libs/kint.php';
 
 // Init vars
 $input_file = 'input.txt';
@@ -34,12 +30,9 @@ if ($handle)
     fclose($handle);
 }
 
-d($map);
-
 // Find size of map
 $numRows = count($map);
 $numColumns = count($map[0]);
-d($numRows, $numColumns);
 
 // Normalize starts and find end
 $starts = [];
@@ -50,6 +43,7 @@ foreach ($map as $rowIndex => $row)
     {
         if ($map[$rowIndex][$columnIndex] == 'S')
         {
+            // Normalize 'S' as 'a'
             $map[$rowIndex][$columnIndex] = 'a';
         }
         if ($place == 'E')
@@ -58,8 +52,6 @@ foreach ($map as $rowIndex => $row)
         }
     }
 }
-
-d($starts, $end);
 
 // Build weight graph
 foreach ($map as $rowIndex => $row)
@@ -78,7 +70,7 @@ foreach ($map as $rowIndex => $row)
             $placeNextHeight = height($rowIndex - 1, $columnIndex);
             $delta = $placeNextHeight - $placeHeight;
 
-            if ($delta >= -1)
+            if ($delta >= -1)     // This one changed
             {
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
@@ -93,7 +85,7 @@ foreach ($map as $rowIndex => $row)
             $placeNextHeight = height($rowIndex + 1, $columnIndex);
             $delta = $placeNextHeight - $placeHeight;
 
-            if ($delta >= -1)
+            if ($delta >= -1)     // This one changed
             {
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
@@ -108,7 +100,7 @@ foreach ($map as $rowIndex => $row)
             $placeNextHeight = height($rowIndex, $columnIndex - 1);
             $delta = $placeNextHeight - $placeHeight;
 
-            if ($delta >= -1)
+            if ($delta >= -1)     // This one changed
             {
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
@@ -123,17 +115,13 @@ foreach ($map as $rowIndex => $row)
             $placeNextHeight = height($rowIndex, $columnIndex + 1);
             $delta = $placeNextHeight - $placeHeight;
 
-            if ($delta >= -1)
+            if ($delta >= -1)     // This one changed
             {
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
         }
     }
 }
-
-d($weight);
-
-echo('<hr />' . PHP_EOL);
 
 // Init Dijkstra
 $visited = [];
@@ -146,7 +134,7 @@ for ($rowIndex = 0; $rowIndex < $numRows; $rowIndex++)
         $distanceFromEnd[$coord] = PHP_INT_MAX;
     }
 }
-$visited[$end] = 0;
+$visited[$end] = true;
 $distanceFromEnd[$end] = 0;
 
 // Loop
@@ -192,9 +180,9 @@ do
         }
     
         // Add closest unvisited to visited
-        $visited[$closestCoord] = $distanceFromEnd[$closestCoord];
-        //d($end, $closestCoord);
+        $visited[$closestCoord] = true;
 
+        // Check if we visited a strating point
         [$closestRow, $closestCol] = explode(',', $closestCoord);
         if ($map[$closestRow][$closestCol] == 'a')
         {
@@ -206,6 +194,8 @@ while (count($unvisitedAdjacent));
 
 echo($distanceFromEnd[$visitedCoord]);
 
+
+// ---- Functions -------------------------------------------------------------
 
 function height($rowIndex, $columnIndex)
 {
@@ -227,7 +217,7 @@ function height($rowIndex, $columnIndex)
     }
     else
     {
-        echo('Errore (1');
+        echo('Errore (1)');
         die();
     }
 

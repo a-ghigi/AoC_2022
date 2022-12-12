@@ -2,13 +2,6 @@
 
 set_time_limit(0);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-include '../../_libs/kint.phar';
-include '../../_libs/kint.php';
-
 // Init vars
 $input_file = 'input.txt';
 $map = [];
@@ -34,12 +27,9 @@ if ($handle)
     fclose($handle);
 }
 
-d($map);
-
 // Find size of map
 $numRows = count($map);
 $numColumns = count($map[0]);
-d($numRows, $numColumns);
 
 // Find start and end
 $start = null;
@@ -67,13 +57,12 @@ foreach ($map as $rowIndex => $row)
     }
 }
 
-d($start, $end);
-
 // Build weight graph
 foreach ($map as $rowIndex => $row)
 {
     foreach ($row as $columnIndex => $place)
     {
+        // Pick place on map
         $placeCoordinates = implode(',', [$rowIndex, $columnIndex]);
         $placeHeight = height($rowIndex, $columnIndex);
 
@@ -82,13 +71,14 @@ foreach ($map as $rowIndex => $row)
         {
             // It's not on the upper border
 
+            // Pick place next to it
             $placeNextCoordinates = implode(',', [$rowIndex - 1, $columnIndex]);
             $placeNextHeight = height($rowIndex - 1, $columnIndex);
             $delta = $placeNextHeight - $placeHeight;
-            //d('UP', $delta, $placeHeight, $placeNextHeight);
 
             if ($delta <= 1)
             {
+                // It's reachable
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
         }
@@ -98,13 +88,14 @@ foreach ($map as $rowIndex => $row)
         {
             // It's not on the upper border
 
+            // Pick place next to it
             $placeNextCoordinates = implode(',', [$rowIndex + 1, $columnIndex]);
             $placeNextHeight = height($rowIndex + 1, $columnIndex);
             $delta = $placeNextHeight - $placeHeight;
-            //d('DOWN', $delta, $placeHeight, $placeNextHeight);
 
             if ($delta <= 1)
             {
+                // It's reachable
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
         }
@@ -114,13 +105,14 @@ foreach ($map as $rowIndex => $row)
         {
             // It's not on the upper border
 
+            // Pick place next to it
             $placeNextCoordinates = implode(',', [$rowIndex, $columnIndex - 1]);
             $placeNextHeight = height($rowIndex, $columnIndex - 1);
             $delta = $placeNextHeight - $placeHeight;
-            //d('RIGHT', $delta, $placeHeight, $placeNextHeight);
 
             if ($delta <= 1)
-           {
+            {
+                // It's reachable
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
         }
@@ -130,22 +122,21 @@ foreach ($map as $rowIndex => $row)
         {
             // It's not on the upper border
 
+            // Pick place next to it
             $placeNextCoordinates = implode(',', [$rowIndex, $columnIndex + 1]);
             $placeNextHeight = height($rowIndex, $columnIndex + 1);
             $delta = $placeNextHeight - $placeHeight;
-            //d('LEFT', $delta, $placeHeight, $placeNextHeight);
 
             if ($delta <= 1)
             {
+                // It's reachable
                 $weight[$placeCoordinates][$placeNextCoordinates] = 1;
             }
         }
     }
 }
 
-d($weight);
-
-// Init Dijkstra
+// Init Dijkstra: all nodes but start have infinite distance
 $visited = [];
 $distanceFromStart = [];
 for ($rowIndex = 0; $rowIndex < $numRows; $rowIndex++)
@@ -156,15 +147,12 @@ for ($rowIndex = 0; $rowIndex < $numRows; $rowIndex++)
         $distanceFromStart[$coord] = PHP_INT_MAX;
     }
 }
-$visited[$start] = 0;
+$visited[$start] = true;
 $distanceFromStart[$start] = 0;
 
 // Loop
-//for ($i = 0; $i < 4; $i++)
 do
 {
-    echo('<hr />' . PHP_EOL);
-
     // Find unvisited adjacent to all visited
     $unvisitedAdjacent = [];
     foreach ($visited as $visitedCoord => $dummy)
@@ -205,13 +193,15 @@ do
         }
     
         // Add closest unvisited to visited
-        $visited[$closestCoord] = $distanceFromStart[$closestCoord];
-        d($closestCoord);
+        $visited[$closestCoord] = true;
     }
 }
-while (count($unvisitedAdjacent));
+while (count($unvisitedAdjacent));    // as long there are adjacent nodes unvisited
 
-d($distanceFromStart[$end]);
+echo($distanceFromStart[$end]);
+
+
+// ---- Functions -------------------------------------------------------------
 
 function height($rowIndex, $columnIndex)
 {
@@ -233,7 +223,7 @@ function height($rowIndex, $columnIndex)
     }
     else
     {
-        echo('Errore (1');
+        echo('Errore (1)');
         die();
     }
 
