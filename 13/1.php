@@ -8,13 +8,15 @@ include '../../_libs/kint.phar';
 include '../../_libs/kint.php';
 
 // Init vars
-$input_file = 'input-test.txt';
+$input_file = 'input.txt';
 $count = 0;
 
 // Load input
 $handle = fopen($input_file, "r");
 if ($handle)
 {
+    $couple = 0;
+
     // Read input, line by line
     while (($line = fgets($handle)) !== false)
     {
@@ -28,11 +30,21 @@ if ($handle)
         // Read separator
         fgets($handle);
 
+        // Increase couple counter
+        $couple++;
+
         // Parse packets
         $left = parse($leftTxt);
         $right = parse($rightTxt);
 
-        d($leftTxt, $rightTxt, $left, $right);
+        $result = in_order($left, $right);
+
+        if ($result)
+        {
+            $count += $couple;
+        }
+
+        d($couple, $leftTxt, $rightTxt, $left, $right, $result, $count);
     }
 
     fclose($handle);
@@ -59,7 +71,7 @@ function parseArray($txt)
 {
     $result = [];
     $parsed = 0;
-    while (($c = substr($txt, 0, 1)))
+    while (($c = substr($txt, 0, 1)) !== '')
     {
         if (in_array($c, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']))
         {
@@ -99,4 +111,111 @@ function parseNumber($txt)
     }
 
     return [intval($numberStr), strlen($numberStr)];
+}
+
+
+function in_order($left, $right)
+{
+    $compare = compareArrays($left, $right);
+
+    $result = null;
+    switch ($compare)
+    {
+        case -1:
+            $result = true;
+            break;
+        case 0:
+            echo('Errore (1)');
+            die();
+            break;
+        case 1:
+            $result = false;
+            break;
+    }
+
+    return $result;
+}
+
+
+function compareArrays($left, $right)
+{
+    if (count($left) == 0 AND count($right) > 0)
+    {
+        return -1;
+    }
+    elseif (count($left) > 0 AND count($right) == 0)
+    {
+        return 1; 
+    }
+    elseif (count($left) == 0 AND count($right) == 0)
+    {
+        return 0;
+    }
+
+    $headLeft = $left[0];
+    $headRight = $right[0];
+
+    if (gettype($headLeft) == 'integer' AND gettype($headRight) == 'integer')
+    {
+        // Heads are both integers
+        if ($headLeft < $headRight)
+        {
+            return -1;
+        }
+        elseif ($headLeft > $headRight)
+        {
+            return 1;
+        }
+        else
+        {
+            return compareArrays(array_slice($left, 1), array_slice($right, 1));
+        }
+    }
+    elseif (gettype($headLeft) == 'array' AND gettype($headRight) == 'array')
+    {
+        // Heads are both arrays
+        $compare = compareArrays($headLeft, $headRight);
+
+        if ($compare == -1)
+        {
+            return -1;
+        }
+        elseif ($compare == 1)
+        {
+            return 1;
+        }
+        else
+        {
+            return compareArrays(array_slice($left, 1), array_slice($right, 1));
+        }
+    }
+    else
+    {
+        // Heads of different type
+        if (gettype($headLeft) == 'integer')
+        {
+            $headLeftArray = [$headLeft];
+            $headRightArray = $headRight;
+        }
+        else
+        {
+            $headLeftArray = $headLeft;
+            $headRightArray = [$headRight];
+        }
+
+        $compare = compareArrays($headLeftArray, $headRightArray);
+
+        if ($compare == -1)
+        {
+            return -1;
+        }
+        elseif ($compare == 1)
+        {
+            return 1;
+        }
+        else
+        {
+            return compareArrays(array_slice($left, 1), array_slice($right, 1));
+        }
+    }
 }
