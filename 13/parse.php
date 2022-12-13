@@ -1,9 +1,20 @@
 <?php
 
+
+//
+// <list>     ::= [ <elements> ]
+// <elements> ::= [[ <element> [[ , <elements> ]] ]]
+// <element>  ::= <number> || <list>
+// <number>   ::= <<digit>> [[ <number> ]]
+// <digit>>   ::= 0 || 1 || 2 || 3 || 4 || 5 || 6 || 7 || 8 || 9
+//
+//   [[ ... ]] means optional
+//   ||        means or
+//
+
+
 function parse($txt)
 {
-    $oldTxt = $txt;
-
     [$parsed, $list] = parseList($txt);
     $txt = substr($txt, strlen($parsed));
 
