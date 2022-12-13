@@ -213,7 +213,7 @@ function height($rowIndex, $columnIndex)
     }
     elseif ($place == 'E')
     {
-        $height = ord('z') - ord('a') + 2;
+        $height = ord('z') - ord('a') + 1;
     }
     else
     {
